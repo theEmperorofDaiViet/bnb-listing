@@ -1,55 +1,49 @@
-import { createStore } from "vuex";
+import { reactive, readonly } from "vue";
 import axios from "axios";
 import useNotification from "./hooks/useNotification";
 
 const { setNotification } = useNotification();
 
-const state = {
+const state = reactive({
     listings: [],
     loading: false
-};
+});
 
 const mutations = {
-    UPDATE_LISTINGS(state, payload) {
+    updateListings: (payload) => {
         state.listings = payload;
     },
-    LOADING_PENDING(state) {
+    loadingPending: () => {
         state.loading = true;
     },
-    LOADING_COMPLETE(state) {
+    loadingComplete: () => {
         state.loading = false;
     }
 };
 
 const actions = {
-    getListings({ commit }) {
-        commit('LOADING_PENDING');
+    getListings: async () => {
+        mutations.loadingPending();
         return axios.get('/api/listings').then((res) => {
-            commit('UPDATE_LISTINGS', res.data);
-            commit('LOADING_COMPLETE');
+            mutations.updateListings(res.data);
+            mutations.loadingComplete();
         });
     },
-    removeListing({ commit }, listing) {
+    removeListing: async (listing) => {
         return axios.post('/api/listings/delete', listing).then((res) => {
-            commit('UPDATE_LISTINGS', res.data);
+            mutations.updateListings(res.data);
             setNotification("Listing has been deleted!");
         });
     },
-    resetListings({ commit }) {
+    resetListings: async () => {
         return axios.post('/api/listings/reset').then((res) => {
-            commit('UPDATE_LISTINGS', res.data);
+            mutations.updateListings(res.data);
         });
     },
 };
 
-const getters = {
-    listings: state => state.listings,
-    loading: state => state.loading
-};
-
-export default createStore({
-    state,
+export default {
+    state: readonly(state),
     mutations,
     actions,
-    getters
-})
+};

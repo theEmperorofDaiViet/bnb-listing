@@ -35,21 +35,21 @@
 </template>
 
 <script>
-import { useStore } from 'vuex';
+import { inject } from 'vue';
 import useDarkMode from '@/hooks/useDarkMode';
 
 export default {
     name: "ListingsListItem",
-    props: ["listing", "isDark"],
+    props: ["listing"],
     setup(props) {
         // access the store
-        const store = useStore();
+        const store = inject("store");
 
         const { darkMode } = useDarkMode();
 
         // methods
         const removeListing = () => {
-            return store.dispatch("removeListing", props.listing);
+            return store.actions.removeListing(props.listing);
         }
 
         // return properties for component to access
